@@ -1,0 +1,19 @@
+POST http://localhost:8000/order HTTP/1.1
+Host: localhost:8000
+Content-Type: application/json
+
+{
+    "id": "b78787ccxxs1b25bfb",
+    "price":  100.20,
+    "tax": 0.5
+};
+
+### GETALL
+GET http://localhost:8000/orders HTTP/1.1
+Host: localhost:8000
+Content-Type: application/json
+
+
+
+CREATE TABLE orders (id VARCHAR(255), price float NOT NULL, tax float NOT NULL, final_price float NOT NULL, PRIMARY KEY (id));
+

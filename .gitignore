@@ -1,0 +1,9 @@
+# .gitignore
+# Docker
+.docker/
+docker-compose*.yml
+*.sock
+
+# MySQL
+mysql_data/
+mysql_config/
