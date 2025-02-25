@@ -1,25 +1,52 @@
-Structure:
-25.1-CLEAN-ARCHITETURE-APP/
-├── cmd/
-│   └── orderSystem/
-│       └── wire.go
-├── internal/
-│   ├── infra/
-│   │   ├── database/
-│   │   ├── grpc/
-│   │   └── graphql/
-├── protofiles/
-├── .env
-├── .gitignore
-├── docker-compose.yml
-├── go.mod
-└── Makefile
+
+# Clean Architecture Order Management System 🚀  
+
+Modern API for order management implementing **Clean Architecture** principles, featuring multi-protocol communication and software engineering best practices.  
+
+**Key Features:**  
+- 🛠 **Multi-Protocol Support**: Integrated communication via gRPC, REST HTTP and GraphQL  
+- 📦 **Complete Decoupling**: Clear separation between business rules, infrastructure, and presentation layers  
+- 🐇 **Event-Driven Architecture**: RabbitMQ messaging system for asynchronous operations  
+- 🧩 **Automated Dependency Injection**: Wire (Google) configuration  
+- 🏗 **Cloud-Ready Scalability**: Dockerized environment with MySQL  
+
+**Technical Demonstrations:**  
+- Practical implementation of Clean Architecture patterns in Go  
+- Advanced patterns: CQRS, Domain Events, and Ports/Adapters  
+- Modern system integration (gRPC ↔ GraphQL ↔ REST interoperability)  
+- CI/CD-ready practices (Full Docker containerization)  
+- Real-world cloud-native application example  
+
+**Core Technologies:**  
+```  
+    Go 1.20+ · gRPC · GraphQL (gqlgen) · MySQL 8 · RabbitMQ · Wire · Chi Router  
+```  
+
+**Project Origin:**  
+Developed as a practical case study for the **Full Cycle Go Postgraduate Program**, demonstrating efficient implementation of complex architectures in Go projects.  
+
+
+** Structure: **
+              25.1-CLEAN-ARCHITETURE-APP/
+              ├── cmd/
+              │   └── orderSystem/
+              │       └── wire.go
+              ├── internal/
+              │   ├── infra/
+              │   │   ├── database/
+              │   │   ├── grpc/
+              │   │   └── graphql/
+              ├── protofiles/
+              ├── .env
+              ├── .gitignore
+              ├── docker-compose.yml
+              ├── go.mod
+              └── Makefile
 
 # Clean Architecture Go Application
 
-API multi-protocol (gRPC, HTTP, GraphQL) para gestão de pedidos seguindo princípios de Clean Architecture
+  API multi-protocol (gRPC, HTTP, GraphQL) para gestão de pedidos seguindo princípios de Clean Architecture
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 ## 📋 Funcionalidades
 
