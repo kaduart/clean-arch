@@ -8,8 +8,7 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: mysql_clean_arch
-      MYSQL_USER: app_user
-      MYSQL_PASSWORD: StrongDBPass123!
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
       MYSQL_INITDB_SKIP_TZINFO: 1
     volumes:
       - mysql_data:/var/lib/mysql
@@ -34,13 +33,19 @@ services:
       - "5672:5672"
       - "15672:15672"
     volumes:
-      - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+      - rabbitmq_data:/var/lib/rabbitmq
+      - ./rabbitmq/conf/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+      - ./rabbitmq/definitions.json:/etc/rabbitmq/definitions.json
     networks:
       - my-network
     environment:
-      - RABBITMQ_CONFIG_FILE=/etc/rabbitmq/rabbitmq.conf
+      RABBITMQ_CONFIG_FILE: /etc/rabbitmq/rabbitmq.conf
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: StrongPassword123!
+      RABBITMQ_DEFAULT_VHOST: /prod
+      RABBITMQ_LOAD_DEFINITIONS: /etc/rabbitmq/definitions.json
     healthcheck:
-      test: ["CMD-SHELL", "rabbitmqctl list_vhosts | grep -q /prod"]
+      test: ["CMD", "rabbitmqctl", "list_vhosts", "|", "grep", "/prod"]
       interval: 20s
       timeout: 30s
       retries: 5
@@ -77,7 +82,7 @@ services:
       rabbitmq:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD", "wget", "--spider", "http://localhost:8000/health"]
       interval: 15s
       timeout: 5s
       start_period: 10s 
@@ -86,8 +91,7 @@ services:
       sh -c "dockerize 
       -wait tcp://mysql:3306 
       -wait tcp://rabbitmq:5672 
-      -wait http://rabbitmq:15672/api/vhosts/%2Fprod
-      -timeout 300s 
+      -timeout 120s 
       ./server start"
     deploy:
       resources:
