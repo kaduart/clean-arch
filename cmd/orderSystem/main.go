@@ -66,8 +66,6 @@ func main() {
 	pb.RegisterOrderServiceServer(grpcServer, createOrderService)
 	reflection.Register(grpcServer)
 
-	fmt.Printf("Starting >> gRPC server on port:%s\n", configs.GRPCServerPort)
-
 	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%s", configs.GRPCServerPort))
 	if err != nil {
 		log.Fatalf("Failed to listen on gRPC port %s: %v", configs.GRPCServerPort, err)
@@ -116,5 +114,11 @@ func getRabbitMQChannel() *amqp091.Channel {
 		panic(err)
 	}
 	fmt.Println("Channel created successfully")
+
+	_, err = ch.QueueDeclarePassive("healthcheck", false, false, false, false, nil)
+	if err != nil {
+		panic("Vhost /prod não está disponível: " + err.Error())
+	}
+
 	return ch
 }
