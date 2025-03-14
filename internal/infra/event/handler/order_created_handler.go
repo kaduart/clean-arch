@@ -40,7 +40,7 @@ func (h *OrderCreatedHandler) Handle(event events.EventInterface, wg *sync.WaitG
 		nil,
 	)
 	if err != nil {
-		return fmt.Errorf("failed to declare queue: %v", err)
+		return fmt.Errorf("falha ao declarar a fila 'orders': %v", err)
 	}
 
 	err = h.RabbitMQChannel.QueueBind(
@@ -51,7 +51,7 @@ func (h *OrderCreatedHandler) Handle(event events.EventInterface, wg *sync.WaitG
 		nil,
 	)
 	if err != nil {
-		return fmt.Errorf("failed to bind queue: %v", err)
+		return fmt.Errorf("falha ao vincular a fila 'orders' à troca 'amq.direct': %v", err)
 	}
 
 	err = h.RabbitMQChannel.Publish(
@@ -63,8 +63,9 @@ func (h *OrderCreatedHandler) Handle(event events.EventInterface, wg *sync.WaitG
 	)
 
 	if err != nil {
-		return fmt.Errorf("failed to publish message: %v", err)
+		return fmt.Errorf("falha ao publicar a mensagem na fila: %v", err)
 	}
-	fmt.Println("Publishing in RabbitMQ!")
+
+	fmt.Println("Mensagem publicada na fila 'orders' do RabbitMQ com sucesso!")
 	return nil
 }

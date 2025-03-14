@@ -1,0 +1,1 @@
+CREATE USER IF NOT EXISTS 'root' @'%' IDENTIFIED WITH mysql_native_password BY '';

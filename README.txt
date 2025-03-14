@@ -1,19 +1,20 @@
 Structure:
-25.1-CLEAN-ARCHITETURE-APP/
 ├── cmd/
 │   └── orderSystem/
-│       └── wire.go
+│       └── main.go
 ├── internal/
 │   ├── infra/
 │   │   ├── database/
 │   │   ├── grpc/
-│   │   └── graphql/
-├── protofiles/
-├── .env
-├── .gitignore
-├── docker-compose.yml
+│   │   └── http/
+├── migrations/                  # Novo
+│   └── 0001_create_orders.sql
+├── scripts/                     # Novo
+│   └── wait-for-db.sh
+├── docker-compose.yml           # Atualizado
+├── Dockerfile                   # Atualizado
 ├── go.mod
-└── Makefile
+└── README.md
 
 # Clean Architecture Go Application
 

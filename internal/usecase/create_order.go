@@ -55,6 +55,7 @@ func (uc *CreateOrderUseCase) Execute(input OrderInputDTO) (OrderOutputDTO, erro
 
 	order.CalculateFinalPrice()
 	if err := uc.OrderRepository.Save(&order); err != nil {
+		log.Printf("error dispatching event: %v", err)
 		return OrderOutputDTO{}, err
 	}
 
@@ -66,6 +67,10 @@ func (uc *CreateOrderUseCase) Execute(input OrderInputDTO) (OrderOutputDTO, erro
 	}
 
 	log.Println("Order event dispatched successfully")
+	if uc.OrderCreatedEvent == nil {
+		log.Println("OrderCreatedEvent is nil")
+		return dto, fmt.Errorf("event not initialized")
+	}
 	uc.OrderCreatedEvent.SetPayload(dto)
 
 	if err := uc.EventDispatcher.Dispatch(uc.OrderCreatedEvent); err != nil {

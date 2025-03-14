@@ -1,5 +1,4 @@
 services:
-
   mysql:
     image: mysql:8.0.33
     container_name: mysql_clean-arch
@@ -7,39 +6,124 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: mysql_clean_arch
-      MYSQL_ROOT_HOST: '%'
-    command:
-      - --default-authentication-plugin=mysql_native_password
-      - --bind-address=0.0.0.0
-      - --explicit_defaults_for_timestamp=1
-      - --socket=/var/run/mysqld/mysqld.sock
-
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_INITDB_SKIP_TZINFO: 1 
     volumes:
       - mysql_data:/var/lib/mysql
-      - mysql_config:/etc/mysql
+      - ./migrations:/docker-entrypoint-initdb.d  # Scripts de inicialização
     ports:
       - "3306:3306"
-      - "50051:50051"
     networks:
       - my-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-u", "root", "-proot", "--protocol=tcp"]  # Formato correto
+      interval: 10s  # Aumente o intervalo
+      timeout: 20s
+      retries: 30    # Dê mais tentativas
+      start_period: 30s  # MySQL demora para inicializar
 
   rabbitmq:
-    image: rabbitmq:3.8.16-management
+    image: rabbitmq:3.13.7-management-alpine
+    user: "999:999"
     container_name: rabbitmq_clean-arch
     hostname: rabbitmq
     ports:
       - "5672:5672"
       - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+      - ./rabbitmq/conf/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
     networks:
       - my-network
     environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
+       RABBITMQ_CONFIG_FILE: /etc/rabbitmq/rabbitmq.conf
+       RABBITMQ_DEFAULT_USER: admin
+       RABBITMQ_DEFAULT_PASS: StrongPassword123!
+       RABBITMQ_DEFAULT_VHOST: /prod
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 20s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+  app:
+    build: .
+    container_name: app_clean-arch
+    ports:
+      - "4000:4000"    # GraphQL
+      - "50051:50051"  # gRPC
+      - "8000:8000"    # Health Check/API
+    environment:
+      DB_DRIVER: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: root
+      DB_NAME: mysql_clean_arch
+      DB_URL: "root:root@tcp(mysql:3306)/mysql_clean_arch?charset=utf8mb4&parseTime=True&loc=Local"
+      RABBITMQ_URL: "amqp://admin:StrongPassword123!@rabbitmq:5672/prod?connection_timeout=30000&heartbeat=60"
+      RABBITMQ_CONNECTION_TIMEOUT: 30000
+      DEBUG: "true"
+      LOG_LEVEL: "debug"
+    networks:
+      - my-network
+    depends_on:
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 5s
+      start_period: 240s 
+      retries: 15
+    command: >
+        sh -c "dockerize 
+        -wait tcp://mysql:3306 
+        -wait tcp://rabbitmq:5672 
+        -timeout 120s 
+        ./server start"
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+
+  grpc-web:
+    image: fullstorydev/grpcui:latest
+    command: 
+      - "--plaintext"  # Adicione se o servidor não usar TLS
+      - "--bind=0.0.0.0:8081" 
+      - "app_clean-arch:50051"  
+    ports:
+      - "8081:8081"
+    networks:
+      - my-network
+    depends_on:
+      app:
+        condition: service_healthy
+
+  evans:
+    build:
+      context: .
+      dockerfile: Dockerfile.evans
+    networks:
+      - my-network
+    depends_on:
+      app:
+        condition: service_healthy
+    stdin_open: true 
+    tty: true
 
 volumes:
   mysql_data:
-  mysql_config:
-
+  mysql_run:
+  rabbitmq_data:
 
 networks:
   my-network:

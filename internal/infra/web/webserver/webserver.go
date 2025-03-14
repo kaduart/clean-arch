@@ -43,6 +43,13 @@ func (s *WebServer) Start() error {
 	return nil
 }
 
+func (s *WebServer) AddHealthCheck() {
+	s.Router.Get("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("OK"))
+	})
+}
+
 func (s *WebServer) Get(path string, handler http.HandlerFunc) {
 	s.Router.MethodFunc("GET", path, handler)
 }

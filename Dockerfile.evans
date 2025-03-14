@@ -1,0 +1,12 @@
+FROM golang:1.22-alpine as builder
+
+WORKDIR /protofiles
+COPY internal/infra/grpc/protofiles/ /protofiles
+
+RUN go install github.com/ktr0731/evans@latest
+
+FROM alpine:3.18
+COPY --from=builder /go/bin/evans /usr/local/bin/evans
+COPY --from=builder /protofiles /protofiles
+
+ENTRYPOINT ["evans", "--host", "app", "--port", "50051", "--proto", "/protofiles/order.proto"]

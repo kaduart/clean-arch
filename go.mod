@@ -2,7 +2,7 @@ module github.com/devfull/25-clean-architeture
 
 go 1.23.0
 
-toolchain go1.23.6
+toolchain go1.23.7
 
 require (
 	github.com/99designs/gqlgen v0.17.66

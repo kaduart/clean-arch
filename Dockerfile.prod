@@ -1,0 +1,24 @@
+FROM golang:alpine
+# Define o diretório de trabalho no container
+WORKDIR /app
+
+# Copia todos os arquivos do projeto para o diretório de trabalho
+COPY . .
+
+# Baixa as dependências do Go
+RUN go mod tidy
+
+# Compila o binário
+RUN go build -o server ./server.go
+
+# Etapa final para a imagem leve
+FROM alpine:3.18
+
+# Define o diretório de trabalho no container
+WORKDIR /app
+
+# Copia o binário compilado da etapa anterior
+COPY --from=builder /app/server .
+
+# Define o entrypoint para o binário
+CMD ["./server"]
