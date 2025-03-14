@@ -18,133 +18,132 @@ Structure:
 
 # Clean Architecture Go Application
 
-API multi-protocol (gRPC, HTTP, GraphQL) para gestão de pedidos seguindo princípios de Clean Architecture
+  API multi-protocol (gRPC, HTTP, GraphQL) para gestão de pedidos seguindo princípios de Clean Architecture
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 ## 📋 Funcionalidades
 
-- Criação de pedidos com cálculo automático de preço final
-- Listagem de todos os pedidos cadastrados
-- Comunicação via múltiplos protocolos:
-  - **gRPC** (porta 50051)
-  - **REST HTTP** (porta 8000)
-  - **GraphQL** (porta 8083)
-- Sistema de eventos com RabbitMQ
-- Banco de dados MySQL para persistência
+    - Criação de pedidos com cálculo automático de preço final
+    - Listagem de todos os pedidos cadastrados
+    - Comunicação via múltiplos protocolos:
+      - **gRPC** (porta 50051)
+      - **REST HTTP** (porta 8000)
+      - **GraphQL** (porta 8083)
+    - Sistema de eventos com RabbitMQ
+    - Banco de dados MySQL para persistência
 
 ## 🛠 Tecnologias
 
-- **Linguagem**: Go 1.20+
-- **gRPC**: Protocolo RPC de alto desempenho
-- **GraphQL**: Implementação com gqlgen
-- **HTTP Router**: Chi Router
-- **DI**: Wire (Google)
-- **Banco de Dados**: MySQL
-- **Message Broker**: RabbitMQ
-- **Configuração**: Viper
+    - **Linguagem**: Go 1.20+
+    - **gRPC**: Protocolo RPC de alto desempenho
+    - **GraphQL**: Implementação com gqlgen
+    - **HTTP Router**: Chi Router
+    - **DI**: Wire (Google)
+    - **Banco de Dados**: MySQL
+    - **Message Broker**: RabbitMQ
+    - **Configuração**: Viper
 
 ## 🚀 Instalação
 
 ### Pré-requisitos
-- Go 1.20+
-- MySQL 8+
-- RabbitMQ
-- Protoc (para compilação de protobuf)
+    - Go 1.20+
+    - MySQL 8+
+    - RabbitMQ
+    - Protoc (para compilação de protobuf)
 
 ### Passos
 1. Clone o repositório:
-```bash
-git clone https://github.com/seu-usuario/clean-arch-go.git
-cd clean-arch-go
+    ```bash
+    git clone https://github.com/seu-usuario/clean-arch-go.git
+    cd clean-arch-go
 
 1. docker-compose.yml
 
-version: '3.8'
-
-services:
-  mysql:
-    image: mysql:8.0
-    environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-      MYSQL_DATABASE: ${DB_NAME}
+    version: '3.8'
+    
+    services:
+      mysql:
+        image: mysql:8.0
+        environment:
+          MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+          MYSQL_DATABASE: ${DB_NAME}
+        volumes:
+          - mysql_data:/var/lib/mysql
+        ports:
+          - "3306:3306"
+        healthcheck:
+          test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+          timeout: 20s
+          interval: 10s
+          retries: 10
+    
+      rabbitmq:
+        image: rabbitmq:3-management
+        ports:
+          - "5672:5672"
+          - "15672:15672"
+        volumes:
+          - rabbitmq_data:/var/lib/rabbitmq
+    
     volumes:
-      - mysql_data:/var/lib/mysql
-    ports:
-      - "3306:3306"
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      timeout: 20s
-      interval: 10s
-      retries: 10
-
-  rabbitmq:
-    image: rabbitmq:3-management
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
-
-volumes:
-  mysql_data:
-  rabbitmq_data:
+      mysql_data:
+      rabbitmq_data:
 
 
 2. .env
 
-# Banco de Dados
-DB_HOST=localhost
-DB_PORT=3306
-DB_USER=root
-DB_PASSWORD=root
-DB_NAME=clean_arch
-
-# Portas
-GRPC_PORT=50051
-HTTP_PORT=8000
-GRAPHQL_PORT=8083
-
-# RabbitMQ
-RABBITMQ_USER=guest
-RABBITMQ_PASSWORD=guest
-
-3. .gitignore
-
-# Binários
-bin/
-vendor/
-*.exe
-*.exe~
-*.dll
-*.so
-*.dylib
-
-# Dependências
-go.sum
-
-# Ambiente
-.env
-*.env.local
-
-# Docker
-.docker/mysql/
-docker-compose.override.yml
-
-# Testes
-*.test
-*.prof
-coverage.txt
-
-# IDEs
-.idea/
-.vscode/
-*.swp
-*.swo
-
-# Logs e arquivos temporários
-*.log
-*.tmp
+    # Banco de Dados
+    DB_HOST=localhost
+    DB_PORT=3306
+    DB_USER=root
+    DB_PASSWORD=root
+    DB_NAME=clean_arch
+    
+    # Portas
+    GRPC_PORT=50051
+    HTTP_PORT=8000
+    GRAPHQL_PORT=8083
+    
+    # RabbitMQ
+    RABBITMQ_USER=guest
+    RABBITMQ_PASSWORD=guest
+    
+    3. .gitignore
+    
+    # Binários
+    bin/
+    vendor/
+    *.exe
+    *.exe~
+    *.dll
+    *.so
+    *.dylib
+    
+    # Dependências
+    go.sum
+    
+    # Ambiente
+    .env
+    *.env.local
+    
+    # Docker
+    .docker/mysql/
+    docker-compose.override.yml
+    
+    # Testes
+    *.test
+    *.prof
+    coverage.txt
+    
+    # IDEs
+    .idea/
+    .vscode/
+    *.swp
+    *.swo
+    
+    # Logs e arquivos temporários
+    *.log
+    *.tmp
 
 
 4. wire.go (DI Configuration)
@@ -198,14 +197,14 @@ require (
 
 6. gqlgen.yml (GraphQL Config)
 
-schema:
-  - graph/schema.graphqls
-exec:
-  filename: graph/generated.go
-  package: graph
-model:
-  filename: graph/model/models_gen.go
-  package: model
-resolver:
-  layout: follow-schema
-  dir: graph
+    schema:
+      - graph/schema.graphqls
+    exec:
+      filename: graph/generated.go
+      package: graph
+    model:
+      filename: graph/model/models_gen.go
+      package: model
+    resolver:
+      layout: follow-schema
+      dir: graph
