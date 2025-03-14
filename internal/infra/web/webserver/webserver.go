@@ -32,7 +32,6 @@ func (s *WebServer) AddHandler(path string, handler http.HandlerFunc) {
 
 // Start inicia o servidor web pegando o middleware de logs do chi
 func (s *WebServer) Start() error {
-	s.Router.Use(middleware.Logger)
 	//aqui ele percorre todos os handlers que eu adicionei e adiciona no meu router
 	for path, handler := range s.Handlers {
 		s.Router.HandleFunc(path, handler)
@@ -44,6 +43,8 @@ func (s *WebServer) Start() error {
 }
 
 func (s *WebServer) AddHealthCheck() {
+	s.Router.Use(middleware.Logger)
+
 	s.Router.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("OK"))

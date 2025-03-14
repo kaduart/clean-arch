@@ -97,7 +97,7 @@ func getRabbitMQChannel() *amqp091.Channel {
 	var conn *amqp091.Connection
 	var err error
 	for i := 0; i < 10; i++ { // Tenta conectar 10 vezes
-		conn, err = amqp091.Dial("amqp://admin:StrongPassword123!@rabbitmq:5672/prod")
+		conn, err = amqp091.Dial("amqp://guest:guest@rabbitmq:5672/")
 		if err == nil {
 			break
 		}
@@ -114,11 +114,6 @@ func getRabbitMQChannel() *amqp091.Channel {
 		panic(err)
 	}
 	fmt.Println("Channel created successfully")
-
-	_, err = ch.QueueDeclarePassive("healthcheck", false, false, false, false, nil)
-	if err != nil {
-		panic("Vhost /prod não está disponível: " + err.Error())
-	}
 
 	return ch
 }

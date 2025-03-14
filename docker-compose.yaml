@@ -8,8 +8,10 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: mysql_clean_arch
-      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
-      MYSQL_INITDB_SKIP_TZINFO: 1
+      MYSQL_USER: app_user
+      MYSQL_PASSWORD: StrongDBPass123!
+      TZ: UTC
+      MYSQL_INITDB_SKIP_TZINFO: 0 
     volumes:
       - mysql_data:/var/lib/mysql
       - ./migrations:/docker-entrypoint-initdb.d  # Scripts de inicialização
@@ -33,23 +35,18 @@ services:
       - "5672:5672"
       - "15672:15672"
     volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
-      - ./rabbitmq/conf/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
-      - ./rabbitmq/definitions.json:/etc/rabbitmq/definitions.json
+      - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
     networks:
       - my-network
     environment:
-      RABBITMQ_CONFIG_FILE: /etc/rabbitmq/rabbitmq.conf
-      RABBITMQ_DEFAULT_USER: admin
-      RABBITMQ_DEFAULT_PASS: StrongPassword123!
-      RABBITMQ_DEFAULT_VHOST: /prod
-      RABBITMQ_LOAD_DEFINITIONS: /etc/rabbitmq/definitions.json
+      - RABBITMQ_CONFIG_FILE=/etc/rabbitmq/rabbitmq.conf
+      - RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS=-rabbit handshake_timeout 60000
     healthcheck:
-      test: ["CMD", "rabbitmqctl", "list_vhosts", "|", "grep", "/prod"]
-      interval: 20s
-      timeout: 30s
-      retries: 5
-      start_period: 10s
+      test: ["CMD-SHELL", "rabbitmq-diagnostics -q ping"]
+      interval: 5s
+      timeout: 10s
+      start_period: 5s
+      retries: 3
     deploy:
       resources:
         limits:
@@ -70,7 +67,7 @@ services:
       DB_PASSWORD: root
       DB_NAME: mysql_clean_arch
       DB_URL: "root:root@tcp(mysql:3306)/mysql_clean_arch?charset=utf8mb4&parseTime=True&loc=Local"
-      RABBITMQ_URL: "amqp://admin:StrongPassword123!@rabbitmq:5672/prod?connection_timeout=30000&heartbeat=60"
+      RABBITMQ_URL: "amqp://guest:guest@rabbitmq:5672"
       RABBITMQ_CONNECTION_TIMEOUT: 30000
       DEBUG: "true"
       LOG_LEVEL: "debug"
@@ -82,7 +79,7 @@ services:
       rabbitmq:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "--spider", "http://localhost:8000/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 15s
       timeout: 5s
       start_period: 10s 
@@ -91,7 +88,7 @@ services:
       sh -c "dockerize 
       -wait tcp://mysql:3306 
       -wait tcp://rabbitmq:5672 
-      -timeout 120s 
+      -timeout 300s 
       ./server start"
     deploy:
       resources:
@@ -103,10 +100,10 @@ services:
     image: fullstorydev/grpcui:latest
     command: 
       - "--plaintext"
-      - "--bind=0.0.0.0:8081" 
+      - "--bind=0.0.0.0" 
       - "app_clean-arch:50051"  
     ports:
-      - "8081:8081"
+      - "8081:8080"
     networks:
       - my-network
     depends_on:
